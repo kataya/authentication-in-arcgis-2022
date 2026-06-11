@@ -14,7 +14,7 @@
     "vite": "^2.8.6"
   },
   "dependencies": {
-    "@arcgis/core": "^4.22.2",
+    "@arcgis/core": "4.34",
     "axios": "^0.26.0"
   },
   "repository": {

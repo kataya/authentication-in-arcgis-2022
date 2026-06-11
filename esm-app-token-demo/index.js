@@ -2,6 +2,7 @@
  * ArcGIS API for JavaScript demo app using application credentials and a server component.
  * This app fills the `appDiv` element in index.html with the map app that searches the map for places
  * and then finds the 3 closest places to the location clicked on the map.
+ * 2026年6月 ArcGIS Maps SDK for JavaScript 4.34 に更新し、ArcGIS Basemap styles を使うように一部コードを変更
  */
 import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
@@ -13,6 +14,9 @@ import FeatureSet from "@arcgis/core/rest/support/FeatureSet";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import IdentityManager from "@arcgis/core/identity/IdentityManager";
 import Axios from "axios";
+import Basemap from "@arcgis/core/Basemap";
+import BasemapStyle from "@arcgis/core/support/BasemapStyle";
+import esriConfig from "@arcgis/core/config";
 
 let tokenExpiration = null;
 let lastGoodToken = null;
@@ -24,6 +28,7 @@ const featureLayerURL = "";
 const appTokenURL = "http://localhost:3080/auth"; // The URL of the token server
 
 // Line symbol to use to display the route
+// ルートを表示するためのライン シンボル
 const routeSymbol = {
     type: "simple-line",
     color: [50, 150, 255, 0.75],
@@ -32,6 +37,7 @@ const routeSymbol = {
 
 /**
  * Display a simple marker symbol on the MapView.
+ * MapView にシンプル マーカー シンボル を表示する
  * @param {string} type The type of point to show, either "start" or "end".
  * @param {Point} point The geographic point to place the marker symbol.
  * @param {MapView} view The mapView to use to display route graphics.
@@ -54,6 +60,7 @@ function addGraphic(type, point, view) {
 
 /**
  * Show the route given the start and end locations.
+ * 出発地と目的地を指定してルートを表示する
  * @param {MapView} view The mapView to use to display route graphics.
  */
 function getRoute(view) {
@@ -102,17 +109,32 @@ function getRoute(view) {
         showDirections(response.routeResults[0].directions.features);
       })
       .catch((error) => {
-        console.log(error);
+        //console.log(error);
+        console.error(error);
       });
 }
 
 /**
  * Create the map and map view once we get the authentication.
+ * 認証が完了したら、Map と MapView を作成する
  */
 function setupMapView() {
 
+    // fromId で旧来のものを使う分には問題ない
+    //const basemap = Basemap.fromId("topo");
+    //const basemap = Basemap.fromId("gray-vector"); //"streets-vector"
+
+    // BasemapStyle で style のid を指定する場合は /styles/arcgis/xxxx  /webmaps/arcgis/xxxx で401エラーが発生する
+    const basemap = new Basemap({
+        style: new BasemapStyle({
+            id: "arcgis/navigation", // "arcgis/light-gray", "arcgis/navigation", "arcgis/topographic"
+            //language: "es"
+        }),
+    });
+
     const map = new Map({
-        basemap: "arcgis-navigation"
+        //basemap: "arcgis-navigation"
+        basemap: basemap
     });
 
     const mapView = new MapView({
@@ -131,14 +153,20 @@ function setupMapView() {
             url: featureLayerURL
         });
         layer.load()
-        .then(function() {
-            map.add(layer);
-        }, function(error) {
-            console.log(error.toString());
-        })
-        .catch(function(error) {
-            console.log(error.toString());
-        })
+            .then(() => {
+                map.add(layer);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+        // .then(function() {
+        //     map.add(layer);
+        // }, function(error) {
+        //     console.log(error.toString());
+        // })
+        // .catch(function(error) {
+        //     console.log(error.toString());
+        // })
     }
 
     mapView.when(() => {
@@ -171,6 +199,9 @@ function setupMapView() {
 /**
  * Wait for a token. If we previously asked for a token and it has not expired then return
  * the locally cached token. Otherwise contact the token server and ask it for a token.
+ * トークンを待つ
+ * 以前にトークンを取得しており有効期限が切れていない場合は、ローカルにキャッシュされているトークンを返す
+ * そうでない場合は、トークンサーバーに接続してトークンを取得する
  * @returns {Promise} A Promise that resolves with a token.
  */
 function requestApplicationToken() {
@@ -196,6 +227,8 @@ function requestApplicationToken() {
                 // remember the token and when it expires
                 lastGoodToken = responseData;
                 tokenExpiration = new Date(Date.now() + (responseData.expires_in * 1000));
+                //debug print
+                //console.log(JSON.stringify(responseData, null, 2));
                 IdentityManager.registerToken({
                     expires: responseData.expires_in,
                     server: responseData.appTokenBaseURL,
@@ -203,6 +236,11 @@ function requestApplicationToken() {
                     token: responseData.access_token,
                     userId: responseData.arcgisUserId
                 });
+
+                // BasemapStyle で style のid を指定する場合は /styles/arcgis/xxxx  /webmaps/arcgis/xxxx で401エラーが発生する
+                // のを回避するために、esriConfig.apiKey に token を設定する
+                esriConfig.apiKey = responseData.access_token;
+
                 resolve(lastGoodToken);
             }
         })
@@ -214,6 +252,7 @@ function requestApplicationToken() {
 
 /**
  * When we receive an error, replace the map with the error details.
+ * エラーが発生した場合、マップをエラー詳細と置き換え
  * @param {object} error The error received from a failed API call.
  */
 function showErrorMessage(error) {
@@ -224,6 +263,7 @@ function showErrorMessage(error) {
 };
 
 // Get a token and render the map
+// トークンを取得し、マップを表示する
 requestApplicationToken()
 .then(function(response) {
     setupMapView();
