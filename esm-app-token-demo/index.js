@@ -118,7 +118,7 @@ function getRoute(view) {
  * Create the map and map view once we get the authentication.
  * 認証が完了したら、Map と MapView を作成する
  */
-function setupMapView() {
+function setupMapView(response) {
 
     // fromId で旧来のものを使う分には問題ない
     //const basemap = Basemap.fromId("topo");
@@ -128,7 +128,8 @@ function setupMapView() {
     const basemap = new Basemap({
         style: new BasemapStyle({
             id: "arcgis/navigation", // "arcgis/light-gray", "arcgis/navigation", "arcgis/topographic"
-            //language: "es"
+            //language: "es",
+            apiKey: response?.access_token,
         }),
     });
 
@@ -239,7 +240,8 @@ function requestApplicationToken() {
 
                 // BasemapStyle で style のid を指定する場合は /styles/arcgis/xxxx  /webmaps/arcgis/xxxx で401エラーが発生する
                 // のを回避するために、esriConfig.apiKey に token を設定する
-                esriConfig.apiKey = responseData.access_token;
+                //esriConfig.apiKey = responseData.access_token;
+                // もしくは BasemapStyle.apiKey に token を設定する
 
                 resolve(lastGoodToken);
             }
@@ -264,10 +266,21 @@ function showErrorMessage(error) {
 
 // Get a token and render the map
 // トークンを取得し、マップを表示する
-requestApplicationToken()
-.then(function(response) {
-    setupMapView();
-})
-.catch(function(error) {
-    showErrorMessage(error);
-});
+// requestApplicationToken()
+// .then(function(response) {
+//     setupMapView(response);
+// })
+// .catch(function(error) {
+//     showErrorMessage(error);
+// });
+// async / await に変更
+async function init() {
+    try {
+        const response = await requestApplicationToken();
+        setupMapView(response);
+    }
+    catch (error) {
+        showErrorMessage(error);
+    }
+}
+init();
