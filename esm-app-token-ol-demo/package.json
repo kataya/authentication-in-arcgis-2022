@@ -1,0 +1,19 @@
+{
+  "name": "esm-app-token-ol-demo",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.1.11"
+  },
+  "dependencies": {
+    "@esri/arcgis-rest-request": "^4.10.2",
+    "@esri/arcgis-rest-routing": "^4.10.2",
+    "axios": "^1.17.0",
+    "ol": "^10.9.0",
+    "ol-mapbox-style": "^13.4.1"
+  }
+}

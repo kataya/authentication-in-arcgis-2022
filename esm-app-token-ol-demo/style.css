@@ -1,0 +1,24 @@
+@import "node_modules/ol/ol.css";
+
+html,
+body,
+#appDiv {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+
+.directions-panel {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.directions-panel h3 {
+  margin: 0 0 8px 0;
+}
+
+.directions-panel ol {
+  padding-left: 20px;
+}
