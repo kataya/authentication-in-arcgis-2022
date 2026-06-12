@@ -29,6 +29,9 @@ There are 6 projects here that demonstrate 3 of the authentication methods:
 <!--The example servers are minimal implementations designed to demonstrate the necessary building blocks for such a service, but require additional security and operational considerations that are beyond the scope of this demo.-->
 サンプルサーバーは、このようなサービスに必要な構成要素を示すために設計された最小限の実装ですが、本デモの範囲を超える追加のセキュリティ対策や運用上の考慮事項が必要となります。
 
+- [esm-app-token-ol-demo](./esm-app-token-ol-demo/README.md) は `esm-app-token-demo` をOpenLayers , ArcGIS REST JS で同等機能のアプリケーションとして作成したものです。
+- [cdn-app-token-demo](./cdn-app-token-demo/) は [2025-DTS-Security-and-auth-for-custom-apps](https://github.com/EsriDevEvents/2025-DTS-Security-and-auth-for-custom-apps) および [Security and Authentication with Custom Applications](https://github.com/EsriDevEvents/security-and-authentication-for-custom-applications-2026) のアプリケーション トークンを使用するサンプルコードを、バックエンドサーバーは上記の Node.js で書かれたサーバーを使ってBasemapStyles が動作するように変更したものです。
+
 ## Additional resources
 
 * [Developers.arcgis.com](https://developers.arcgis.com/)
